@@ -58,6 +58,43 @@
             height: 40vh;
             width: 100%;
         }
+        /* Custom Range Slider Styles */
+        .price-slider-container {
+            position: relative;
+            height: 20px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+        }
+        .price-slider-track, .price-slider-progress {
+            position: absolute;
+            height: 4px;
+            border-radius: 2px;
+            width: 100%;
+            left: 0;
+        }
+        .price-slider-track {
+            background-color: #e2e8f0;
+        }
+        .dark .price-slider-track {
+            background-color: #4a5568;
+        }
+        .price-slider-progress {
+            background-color: #3b82f6;
+        }
+        .price-slider-handle {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background-color: #3b82f6;
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            z-index: 2;
+            border: 2px solid white;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+        }
     </style>
     <script>
         tailwind.config = {
@@ -92,7 +129,7 @@
                     <option value="alpha">Alfabética (A-Z)</option>
                     <option value="price-asc">Valor (Menor para Maior)</option>
                     <option value="price-desc">Valor (Maior para Menor)</option>
-                    <option value="specialty">Especialidade</option>
+                    <option value="specialty" selected>Especialidade</option>
                 </select>
             </div>
             <div class="mb-4">
@@ -101,14 +138,22 @@
                     <option value="all">Todas</option>
                 </select>
             </div>
-            <div>
-                <label for="price-range" class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Faixa de Valor (R$)</label>
-                <input type="range" id="price-range" class="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer" min="0" max="10000" step="100">
-                <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Faixa de Valor (R$)</label>
+                <div class="price-slider-container" id="price-slider">
+                    <div class="price-slider-track"></div>
+                    <div class="price-slider-progress" id="price-slider-progress"></div>
+                    <div class="price-slider-handle" id="handle-min"></div>
+                    <div class="price-slider-handle" id="handle-max"></div>
+                </div>
+                <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2">
                     <span id="min-price-label">R$ 0</span>
-                    <span id="max-price-label">R$ 10.000+</span>
+                    <span id="max-price-label">R$ 15.500</span>
                 </div>
             </div>
+            <button id="clear-filters-btn" class="w-full bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition">
+                <i class="fas fa-times-circle"></i> Limpar Filtros
+            </button>
         </aside>
 
         <!-- Conteúdo Principal -->
@@ -154,7 +199,6 @@
                 <section id="stats-section" class="mt-12">
                     <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">Estatísticas</h2>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- Stats por Especialidade -->
                         <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
                             <h3 class="font-bold text-lg mb-4 text-gray-700 dark:text-gray-200">Análise de Preços</h3>
                             <select id="stats-specialty-selector" class="w-full p-2 mb-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500">
@@ -175,7 +219,6 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Histograma de Preços -->
                         <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
                              <h3 class="font-bold text-lg mb-4 text-gray-700 dark:text-gray-200">Distribuição de Preços (Histograma)</h3>
                             <div class="chart-container">
@@ -301,44 +344,50 @@
                 id: p.name.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Math.random().toString(36).substr(2, 9)
             })).filter(p => p.valueBRL > 0);
 
-            const procedureList = document.getElementById('procedure-list');
-            const searchInput = document.getElementById('search');
-            const sortSelect = document.getElementById('sort');
-            const specialtyFilter = document.getElementById('specialty-filter');
-            const priceRange = document.getElementById('price-range');
-            const minPriceLabel = document.getElementById('min-price-label');
-            const maxPriceLabel = document.getElementById('max-price-label');
-            const noResultsDiv = document.getElementById('no-results');
-            const filterPanel = document.getElementById('filter-panel');
-            const mainContentWrapper = document.getElementById('main-content-wrapper');
-            const toggleFiltersBtnOutside = document.getElementById('toggle-filters-btn-outside');
-            const toggleFiltersBtnInside = document.getElementById('toggle-filters-btn-inside');
-            const budgetPanel = document.getElementById('budget-panel');
-            const budgetToggleBtn = document.getElementById('budget-toggle-btn');
-            const closeBudgetBtn = document.getElementById('close-budget-btn');
-            const budgetCount = document.getElementById('budget-count');
-            const budgetItemsContainer = document.getElementById('budget-items');
-            const budgetTotalBRL = document.getElementById('budget-total-brl');
-            const budgetTotalUSD = document.getElementById('budget-total-usd');
-            const emptyBudgetDiv = document.getElementById('empty-budget');
-            const clearBudgetBtn = document.getElementById('clear-budget-btn');
-            const statsSpecialtySelector = document.getElementById('stats-specialty-selector');
-            const statMin = document.getElementById('stat-min');
-            const statAvg = document.getElementById('stat-avg');
-            const statMax = document.getElementById('stat-max');
-            const themeToggleButton = document.getElementById('theme-toggle-btn');
-            const scrollToStatsButton = document.getElementById('scroll-to-stats-btn');
-            const scrollArea = document.getElementById('scroll-area');
+            const getEl = (id) => document.getElementById(id);
 
-            // --- FUNÇÕES AUXILIARES ---
+            const procedureList = getEl('procedure-list');
+            const searchInput = getEl('search');
+            const sortSelect = getEl('sort');
+            const specialtyFilter = getEl('specialty-filter');
+            const noResultsDiv = getEl('no-results');
+            const filterPanel = getEl('filter-panel');
+            const mainContentWrapper = getEl('main-content-wrapper');
+            const toggleFiltersBtnOutside = getEl('toggle-filters-btn-outside');
+            const toggleFiltersBtnInside = getEl('toggle-filters-btn-inside');
+            const budgetPanel = getEl('budget-panel');
+            const budgetToggleBtn = getEl('budget-toggle-btn');
+            const closeBudgetBtn = getEl('close-budget-btn');
+            const budgetCount = getEl('budget-count');
+            const budgetItemsContainer = getEl('budget-items');
+            const budgetTotalBRL = getEl('budget-total-brl');
+            const budgetTotalUSD = getEl('budget-total-usd');
+            const emptyBudgetDiv = getEl('empty-budget');
+            const clearBudgetBtn = getEl('clear-budget-btn');
+            const statsSpecialtySelector = getEl('stats-specialty-selector');
+            const statMin = getEl('stat-min');
+            const statAvg = getEl('stat-avg');
+            const statMax = getEl('stat-max');
+            const themeToggleButton = getEl('theme-toggle-btn');
+            const scrollToStatsButton = getEl('scroll-to-stats-btn');
+            const clearFiltersBtn = getEl('clear-filters-btn');
+
+            // --- Price Slider Elements ---
+            const priceSlider = getEl('price-slider');
+            const handleMin = getEl('handle-min');
+            const handleMax = getEl('handle-max');
+            const progress = getEl('price-slider-progress');
+            const minPriceLabel = getEl('min-price-label');
+            const maxPriceLabel = getEl('max-price-label');
+            let minPrice = 0, maxPrice = 0, currentMinPrice = 0, currentMaxPrice = 0;
+
             const formatCurrency = (value) => Math.round(value).toLocaleString('pt-BR');
 
-            // --- INICIALIZAÇÃO ---
             function initialize() {
+                setupPriceSlider();
                 populateSpecialtyFilter();
                 setupEventListeners();
-                updateDisplay();
-                updateStats();
+                resetFilters();
                 checkInitialTheme();
                 handleResize();
             }
@@ -352,21 +401,12 @@
                     statsSpecialtySelector.appendChild(option.cloneNode(true));
                     specialtyFilter.appendChild(option);
                 });
-                
-                const maxPrice = Math.max(...procedures.map(p => p.valueBRL));
-                priceRange.max = Math.ceil(maxPrice / 100) * 100;
-                priceRange.value = priceRange.max;
-                maxPriceLabel.textContent = `R$ ${formatCurrency(priceRange.max)}`;
             }
 
             function setupEventListeners() {
                 searchInput.addEventListener('input', updateDisplay);
                 sortSelect.addEventListener('change', updateDisplay);
                 specialtyFilter.addEventListener('change', updateDisplay);
-                priceRange.addEventListener('input', () => {
-                   minPriceLabel.textContent = `R$ ${formatCurrency(priceRange.value)}`;
-                   updateDisplay();
-                });
 
                 toggleFiltersBtnOutside.addEventListener('click', toggleFilterPanel);
                 toggleFiltersBtnInside.addEventListener('click', toggleFilterPanel);
@@ -376,23 +416,99 @@
                 statsSpecialtySelector.addEventListener('change', updateStats);
                 themeToggleButton.addEventListener('click', toggleTheme);
                 scrollToStatsButton.addEventListener('click', () => {
-                    document.getElementById('stats-section').scrollIntoView({ behavior: 'smooth' });
+                    getEl('stats-section').scrollIntoView({ behavior: 'smooth' });
                 });
+                clearFiltersBtn.addEventListener('click', resetFilters);
                 window.addEventListener('resize', handleResize);
             }
 
-            // --- LÓGICA DE EXIBIÇÃO ---
+            function setupPriceSlider() {
+                minPrice = Math.min(...procedures.map(p => p.valueBRL));
+                maxPrice = Math.max(...procedures.map(p => p.valueBRL));
+                currentMinPrice = minPrice;
+                currentMaxPrice = maxPrice;
+
+                function setupHandle(handle, isMin) {
+                    const onMove = (clientX) => {
+                        const rect = priceSlider.getBoundingClientRect();
+                        let newX = clientX - rect.left;
+                        let percent = newX / rect.width;
+                        percent = Math.max(0, Math.min(1, percent));
+
+                        const newValue = Math.round(minPrice + percent * (maxPrice - minPrice));
+
+                        if (isMin) {
+                            currentMinPrice = Math.min(newValue, currentMaxPrice);
+                        } else {
+                            currentMaxPrice = Math.max(newValue, currentMinPrice);
+                        }
+                        updateSliderUI();
+                    };
+
+                    const onEnd = () => {
+                        document.removeEventListener('mousemove', onMouseMove);
+                        document.removeEventListener('mouseup', onEnd);
+                        document.removeEventListener('touchmove', onTouchMove);
+                        document.removeEventListener('touchend', onEnd);
+                        updateDisplay();
+                    };
+                    
+                    const onMouseMove = (e) => onMove(e.clientX);
+                    const onTouchMove = (e) => onMove(e.touches[0].clientX);
+
+                    handle.addEventListener('mousedown', (e) => {
+                        e.preventDefault();
+                        document.addEventListener('mousemove', onMouseMove);
+                        document.addEventListener('mouseup', onEnd);
+                    });
+                    handle.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        document.addEventListener('touchmove', onTouchMove);
+                        document.addEventListener('touchend', onEnd);
+                    });
+                }
+
+                setupHandle(handleMin, true);
+                setupHandle(handleMax, false);
+                updateSliderUI();
+            }
+            
+            function updateSliderUI() {
+                const range = maxPrice - minPrice;
+                if(range === 0) return;
+
+                const minPercent = (currentMinPrice - minPrice) / range * 100;
+                const maxPercent = (currentMaxPrice - minPrice) / range * 100;
+
+                handleMin.style.left = `calc(${minPercent}% - 8px)`;
+                handleMax.style.left = `calc(${maxPercent}% - 8px)`;
+                progress.style.left = `${minPercent}%`;
+                progress.style.width = `${maxPercent - minPercent}%`;
+
+                minPriceLabel.textContent = `R$ ${formatCurrency(currentMinPrice)}`;
+                maxPriceLabel.textContent = `R$ ${formatCurrency(currentMaxPrice)}`;
+            }
+
+            function resetFilters() {
+                searchInput.value = '';
+                sortSelect.value = 'specialty';
+                specialtyFilter.value = 'all';
+                currentMinPrice = minPrice;
+                currentMaxPrice = maxPrice;
+                updateSliderUI();
+                updateDisplay();
+            }
+
             function updateDisplay() {
                 let filteredProcedures = [...procedures];
 
                 const searchTerm = searchInput.value.toLowerCase();
                 const selectedSpecialty = specialtyFilter.value;
-                const maxPrice = Number(priceRange.value);
 
                 filteredProcedures = filteredProcedures.filter(p => {
                     const nameMatch = p.name.toLowerCase().includes(searchTerm);
                     const specialtyMatch = selectedSpecialty === 'all' || p.specialty === selectedSpecialty;
-                    const priceMatch = p.valueBRL <= maxPrice;
+                    const priceMatch = p.valueBRL >= currentMinPrice && p.valueBRL <= currentMaxPrice;
                     return nameMatch && specialtyMatch && priceMatch;
                 });
 
@@ -437,7 +553,6 @@
                 });
             }
 
-            // --- LÓGICA DO ORÇAMENTO ---
             function toggleBudgetItem(id) {
                 const indexInBudget = budget.findIndex(item => item.id === id);
                 if (indexInBudget > -1) budget.splice(indexInBudget, 1);
@@ -486,7 +601,6 @@
                 updateDisplay();
             }
 
-            // --- LÓGICA DE ESTATÍSTICAS ---
             function updateStats() {
                 const selectedSpecialty = statsSpecialtySelector.value;
                 const dataSet = selectedSpecialty === 'all' 
@@ -506,7 +620,7 @@
             }
 
             function updateHistogram(data) {
-                const ctx = document.getElementById('price-histogram').getContext('2d');
+                const ctx = getEl('price-histogram').getContext('2d');
                 const prices = data.map(p => p.valueBRL);
                 
                 if (priceChart) priceChart.destroy();
@@ -520,7 +634,7 @@
 
                 prices.forEach(price => {
                     const binIndex = Math.min(Math.floor(price / binSize), binCount - 1);
-                    bins[binIndex]++;
+                    if(binIndex >= 0) bins[binIndex]++;
                 });
                 
                 const isDarkMode = document.documentElement.classList.contains('dark');
@@ -541,7 +655,6 @@
                 });
             }
 
-            // --- LÓGICA DE TEMA E LAYOUT ---
             function toggleTheme() {
                 const html = document.documentElement;
                 html.classList.toggle('dark');
@@ -552,7 +665,7 @@
                     localStorage.setItem('theme', 'light');
                     themeToggleButton.innerHTML = '<i class="fas fa-moon"></i>';
                 }
-                updateDisplay(); // Redesenha o gráfico com as cores do novo tema
+                updateDisplay();
             }
 
             function checkInitialTheme() {
