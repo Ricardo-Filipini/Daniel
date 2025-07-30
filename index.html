@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infográfico de Procedimentos Odontológicos</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js for graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide-react@latest/dist/lucide-react.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* gray-50 */
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9; /* slate-100 */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8; /* slate-400 */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b; /* slate-500 */
+        }
+        /* Custom styles for Chart.js tooltip */
+        .chartjs-tooltip {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border-radius: 6px;
+            padding: 6px;
+        }
+        .budget-item-enter {
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .budget-item-enter-active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-900">Dashboard de Procedimentos</h1>
+            <p class="text-slate-500 mt-2">Visualize, filtre e compare os custos de procedimentos odontológicos.</p>
+        </header>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Left Column: Controls & Stats -->
+            <aside class="lg:col-span-1 space-y-6">
+                
+                <!-- Controls Card -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h2 class="text-xl font-semibold mb-4 border-b pb-2">Controles</h2>
+                    <div class="space-y-4">
+                        <!-- Search -->
+                        <div>
+                            <label for="search" class="text-sm font-medium text-slate-600">Pesquisar Procedimento</label>
+                            <input type="text" id="search" placeholder="Ex: Clareamento" class="w-full mt-1 p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                        </div>
+                        <!-- Sort -->
+                        <div>
+                            <label for="sort" class="text-sm font-medium text-slate-600">Organizar por</label>
+                            <select id="sort" class="w-full mt-1 p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                <option value="valor-asc">Valor (Menor para Maior)</option>
+                                <option value="valor-desc">Valor (Maior para Menor)</option>
+                                <option value="alfa-asc">Nome (A-Z)</option>
+                                <option value="alfa-desc">Nome (Z-A)</option>
+                                <option value="especialidade">Especialidade</option>
+                            </select>
+                        </div>
+                        <!-- Filter by Specialty -->
+                        <div>
+                            <label for="filter-specialty" class="text-sm font-medium text-slate-600">Filtrar por Especialidade</label>
+                            <select id="filter-specialty" class="w-full mt-1 p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                <option value="all">Todas as Especialidades</option>
+                            </select>
+                        </div>
+                        <!-- Filter by Price -->
+                        <div>
+                            <label class="text-sm font-medium text-slate-600">Filtrar por Faixa de Valor (R$)</label>
+                            <div class="flex items-center space-x-2 mt-1">
+                                <input type="number" id="min-price" placeholder="Min" class="w-1/2 p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                <span class="text-slate-400">-</span>
+                                <input type="number" id="max-price" placeholder="Max" class="w-1/2 p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Card -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h2 class="text-xl font-semibold mb-4 border-b pb-2">Estatísticas por Especialidade</h2>
+                    <div id="stats-container" class="space-y-4 max-h-80 overflow-y-auto">
+                        <p class="text-slate-500 text-center">Filtre os dados para ver as estatísticas.</p>
+                    </div>
+                </div>
+
+                <!-- Histogram Card -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h2 class="text-xl font-semibold mb-4 border-b pb-2">Histograma de Preços</h2>
+                    <canvas id="price-histogram"></canvas>
+                </div>
+
+            </aside>
+
+            <!-- Right Column: Procedures & Budget -->
+            <main class="lg:col-span-2 space-y-6">
+                <!-- Procedures List -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-center mb-4 border-b pb-2">
+                        <h2 class="text-xl font-semibold">Lista de Procedimentos</h2>
+                        <span id="procedure-count" class="text-sm font-medium bg-blue-100 text-blue-800 px-2 py-1 rounded-full"></span>
+                    </div>
+                    <div id="procedures-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[1200px] overflow-y-auto pr-2">
+                        <!-- Procedure cards will be injected here -->
+                    </div>
+                </div>
+                
+                <!-- Budget Card -->
+                <div id="budget-section" class="sticky bottom-4">
+                    <div class="bg-slate-800 text-white p-6 rounded-2xl shadow-lg border border-slate-700">
+                        <h2 class="text-xl font-semibold mb-4">Orçamento</h2>
+                        <div id="budget-items" class="space-y-2 max-h-40 overflow-y-auto mb-4 pr-2">
+                           <p class="text-slate-400 text-center">Selecione procedimentos para adicioná-los ao orçamento.</p>
+                        </div>
+                        <div class="border-t border-slate-600 pt-4 mt-4 flex justify-between items-center">
+                            <span class="text-lg font-bold">Total:</span>
+                            <div class="text-right">
+                                <p id="budget-total-brl" class="text-2xl font-bold text-green-400">R$ 0,00</p>
+                                <p id="budget-total-usd" class="text-md text-slate-300">$ 0.00</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA ---
+        // This data is parsed from the provided CSV file.
+        const proceduresData = [
+            { "procedimento": "Acabamento e polimento- sessão", "especialidade": "Dentística", "valorBRL": 550, "valorUSD": 91.74 },
+            { "procedimento": "Ajuste Oclusal - 2 sessões", "especialidade": "Dentística", "valorBRL": 820, "valorUSD": 136.78 },
+            { "procedimento": "Alinhador", "especialidade": "Ortodontia", "valorBRL": 3550, "valorUSD": 592.16 },
+            { "procedimento": "Aparelho estético fixo (valor do aparelho e instalação)", "especialidade": "Ortodontia", "valorBRL": 3850, "valorUSD": 642.20 },
+            { "procedimento": "Aparelho Extrabucal", "especialidade": "Cirurgia", "valorBRL": 1650, "valorUSD": 275.22 },
+            { "procedimento": "Aparelho extraucal de Thurow", "especialidade": "Ortodontia", "valorBRL": 1650, "valorUSD": 275.22 },
+            { "procedimento": "Aparelho fixo metálico (Autoligado/Baixo atrito SWLF) - valor do aparelho e instalação", "especialidade": "Ortodontia", "valorBRL": 3450, "valorUSD": 575.47 },
+            { "procedimento": "Aparelho fixo metálico (valor do aparelho e instalação)", "especialidade": "Ortodontia", "valorBRL": 3350, "valorUSD": 558.79 },
+            { "procedimento": "Aparelho Removível com alça de Bionator", "especialidade": "Ortodontia", "valorBRL": 1650, "valorUSD": 275.22 },
+            { "procedimento": "Aparelho Removível com grade", "especialidade": "Ortodontia", "valorBRL": 1650, "valorUSD": 275.22 },
+            { "procedimento": "Aplicação de dessensibilizante", "especialidade": "Dentística", "valorBRL": 450, "valorUSD": 75.06 },
+            { "procedimento": "Aprofundamento de Vestíbulo", "especialidade": "Cirurgia", "valorBRL": 1250, "valorUSD": 208.50 },
+            { "procedimento": "Bichectomia", "especialidade": "Harmonização Orofacial", "valorBRL": 3500, "valorUSD": 583.82 },
+            { "procedimento": "Capeamento pulpar direto", "especialidade": "Dentística", "valorBRL": 550, "valorUSD": 91.74 },
+            { "procedimento": "Cirurgia de freio lingual", "especialidade": "Cirurgia", "valorBRL": 1250, "valorUSD": 208.50 },
+            { "procedimento": "Cirurgia para remoção de dentes inclusos", "especialidade": "Cirurgia", "valorBRL": 2500, "valorUSD": 417.01 },
+            { "procedimento": "Clareamento Caseiro (moldeira + produto)", "especialidade": "Dentística", "valorBRL": 1250, "valorUSD": 208.50 },
+            { "procedimento": "Clareamento de consultório (2 sessões)", "especialidade": "Dentística", "valorBRL": 1850, "valorUSD": 308.59 },
+            { "procedimento": "Clareamento de dente desvitalizado - 3 sessões", "especialidade": "Dentística", "valorBRL": 950, "valorUSD": 158.46 },
+            { "procedimento": "Confecção de Placa de Mordida (bruxismo)", "especialidade": "Disfunção Temporomandibular", "valorBRL": 1250, "valorUSD": 208.50 },
+            { "procedimento": "Consulta de Urgência", "especialidade": "Prevenção", "valorBRL": 450, "valorUSD": 75.06 },
+            { "procedimento": "Consulta Inicial (anamnese, exame clínico, plano de tratamento, profilaxia)", "especialidade": "Prevenção", "valorBRL": 550, "valorUSD": 91.74 },
+            { "procedimento": "Coroa de Zircônia sobre dente", "especialidade": "Prótese", "valorBRL": 3850, "valorUSD": 642.20 },
+            { "procedimento": "Coroa de Zircônia sobre implante", "especialidade": "Prótese", "valorBRL": 4250, "valorUSD": 708.92 },
+            { "procedimento": "Coroa provisória", "especialidade": "Prótese", "valorBRL": 550, "valorUSD": 91.74 },
+            { "procedimento": "Coroa Total Metalo Cerâmica sobre dente", "especialidade": "Prótese", "valorBRL": 3350, "valorUSD": 558.79 },
+            { "procedimento": "Coroa Total Metalo Cerâmica sobre implante", "especialidade": "Prótese", "valorBRL": 3850, "valorUSD": 642.20 },
+            { "procedimento": "Documentação Ortodôntica Completa", "especialidade": "Radiologia", "valorBRL": 550, "valorUSD": 91.74 },
+            { "procedimento": "Enxerto Gengival Livre", "especialidade": "Periodontia", "valorBRL": 1950, "valorUSD": 325.27 },
+            { "procedimento": "Exodontia (extração)", "especialidade": "Cirurgia", "valorBRL": 850, "valorUSD": 141.78 },
+            { "procedimento": "Exodontia de dente decíduo", "especialidade": "Odontopediatria", "valorBRL": 450, "valorUSD": 75.06 },
+            { "procedimento": "Facetas de resina (por dente)", "especialidade": "Dentística", "valorBRL": 1250, "valorUSD": 208.50 },
+            { "procedimento": "Gengivoplastia", "especialidade": "Periodontia", "valorBRL": 850, "valorUSD": 141.78 },
+            { "procedimento": "Implante (fase cirúrgica)", "especialidade": "Implantodontia", "valorBRL": 3550, "valorUSD": 592.16 },
+            { "procedimento": "Lente de contato / Faceta de Porcelana (por dente)", "especialidade": "Prótese", "valorBRL": 3550, "valorUSD": 592.16 },
+            { "procedimento": "Manutenção de aparelho", "especialidade": "Ortodontia", "valorBRL": 350, "valorUSD": 58.38 },
+            { "procedimento": "Pino de fibra de vidro", "especialidade": "Prótese", "valorBRL": 950, "valorUSD": 158.46 },
+            { "procedimento": "Preenchimento Labial", "especialidade": "Harmonização Orofacial", "valorBRL": 1500, "valorUSD": 250.20 },
+            { "procedimento": "Preenchimento Malar", "especialidade": "Harmonização Orofacial", "valorBRL": 3500, "valorUSD": 583.82 },
+            { "procedimento": "Preenchimento Olheira", "especialidade": "Harmonização Orofacial", "valorBRL": 1500, "valorUSD": 250.20 },
+            { "procedimento": "Profilaxia (limpeza)", "especialidade": "Prevenção", "valorBRL": 550, "valorUSD": 91.74 },
+            { "procedimento": "Prótese Total (dentadura)", "especialidade": "Prótese", "valorBRL": 3550, "valorUSD": 592.16 },
+            { "procedimento": "Radiografia periapical", "especialidade": "Radiologia", "valorBRL": 30, "valorUSD": 5.00 },
+            { "procedimento": "Raspagem subgengival (por quadrante)", "especialidade": "Periodontia", "valorBRL": 850, "valorUSD": 141.78 },
+            { "procedimento": "Raspagem supragengival", "especialidade": "Periodontia", "valorBRL": 850, "valorUSD": 141.78 },
+            { "procedimento": "Restauração de Resina 1 face", "especialidade": "Dentística", "valorBRL": 550, "valorUSD": 91.74 },
+            { "procedimento": "Restauração de Resina 2 faces", "especialidade": "Dentística", "valorBRL": 650, "valorUSD": 108.42 },
+            { "procedimento": "Restauração de Resina 3 faces", "especialidade": "Dentística", "valorBRL": 850, "valorUSD": 141.78 },
+            { "procedimento": "Restauração de Resina 4 faces", "especialidade": "Dentística", "valorBRL": 950, "valorUSD": 158.46 },
+            { "procedimento": "Retratamento Endodôntico Birradicular", "especialidade": "Endodontia", "valorBRL": 2500, "valorUSD": 417.01 },
+            { "procedimento": "Retratamento Endodôntico Multirradicular", "especialidade": "Endodontia", "valorBRL": 2950, "valorUSD": 492.09 },
+            { "procedimento": "Retratamento Endodôntico Unirradicular", "especialidade": "Endodontia", "valorBRL": 1950, "valorUSD": 325.27 },
+            { "procedimento": "Skinbooster", "especialidade": "Harmonização Orofacial", "valorBRL": 1500, "valorUSD": 250.20 },
+            { "procedimento": "Toxina botulínica (botox)", "especialidade": "Harmonização Orofacial", "valorBRL": 1400, "valorUSD": 233.52 },
+            { "procedimento": "Traçado Cefalomérico", "especialidade": "Radiologia", "valorBRL": 30, "valorUSD": 5.00 },
+            { "procedimento": "Tratamento Cirúrgico de Fístula Buco Sinusal/Buco Nasal c/ Retalho", "especialidade": "Cirurgia", "valorBRL": 2500, "valorUSD": 417.01 },
+            { "procedimento": "Tratamento com Alinhador", "especialidade": "Ortodontia", "valorBRL": 15500, "valorUSD": 2585.48 },
+            { "procedimento": "Tratamento de fluorose - microabrasão", "especialidade": "Periodontia", "valorBRL": 550, "valorUSD": 91.74 },
+            { "procedimento": "Tratamento de Gengivite", "especialidade": "Prevenção", "valorBRL": 900, "valorUSD": 150.12 },
+            { "procedimento": "Tratamento de Lesão Cística (enucleação)", "especialidade": "Cirurgia", "valorBRL": 1750, "valorUSD": 291.90 },
+            { "procedimento": "Tratamento de Lesão Cística (marzupialização e enucleação final)", "especialidade": "Cirurgia", "valorBRL": 1950, "valorUSD": 325.27 },
+            { "procedimento": "Tratamento Endodôntico Birradicular", "especialidade": "Endodontia", "valorBRL": 2100, "valorUSD": 350.29 },
+            { "procedimento": "Tratamento Endodôntico de Dente com Rizogênese Incompleta", "especialidade": "Endodontia", "valorBRL": 2500, "valorUSD": 417.01 },
+            { "procedimento": "Tratamento Endodôntico Multirradicular", "especialidade": "Endodontia", "valorBRL": 2500, "valorUSD": 417.01 },
+            { "procedimento": "Tratamento Endodôntico Unirradicular", "especialidade": "Endodontia", "valorBRL": 1750, "valorUSD": 291.90 }
+        ];
+
+        // --- STATE ---
+        let state = {
+            procedures: proceduresData.map((p, index) => ({ ...p, id: index })),
+            filters: {
+                search: '',
+                specialty: 'all',
+                minPrice: null,
+                maxPrice: null,
+            },
+            sort: 'valor-asc',
+            budget: [], // array of procedure ids
+        };
+
+        // --- DOM ELEMENTS ---
+        const proceduresList = document.getElementById('procedures-list');
+        const searchInput = document.getElementById('search');
+        const sortSelect = document.getElementById('sort');
+        const specialtyFilter = document.getElementById('filter-specialty');
+        const minPriceInput = document.getElementById('min-price');
+        const maxPriceInput = document.getElementById('max-price');
+        const procedureCount = document.getElementById('procedure-count');
+        const statsContainer = document.getElementById('stats-container');
+        const budgetItemsContainer = document.getElementById('budget-items');
+        const budgetTotalBRL = document.getElementById('budget-total-brl');
+        const budgetTotalUSD = document.getElementById('budget-total-usd');
+        
+        // --- CHART INSTANCE ---
+        let priceChart = null;
+
+        // --- UTILITY FUNCTIONS ---
+        const formatCurrency = (value, currency = 'BRL') => {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: currency,
+            }).format(value);
+        };
+
+        // --- RENDER FUNCTIONS ---
+        
+        /**
+         * Renders a single procedure card.
+         * @param {object} proc - The procedure object.
+         * @returns {string} - The HTML string for the card.
+         */
+        const renderProcedureCard = (proc) => {
+            const isSelected = state.budget.includes(proc.id);
+            return `
+                <div 
+                    class="p-4 border ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-slate-200'} rounded-xl cursor-pointer hover:shadow-md hover:border-blue-400 transition-all duration-300"
+                    data-id="${proc.id}"
+                >
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1 pr-4">
+                            <h3 class="font-semibold text-slate-800">${proc.procedimento}</h3>
+                            <p class="text-sm text-slate-500">${proc.especialidade}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-lg text-green-600">${formatCurrency(proc.valorBRL)}</p>
+                            <p class="text-sm text-slate-400">${formatCurrency(proc.valorUSD, 'USD')}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
+        /**
+         * Renders the list of procedures based on current state (filters and sort).
+         */
+        const renderProcedures = () => {
+            let filteredProcedures = [...state.procedures];
+
+            // Apply search filter
+            if (state.filters.search) {
+                filteredProcedures = filteredProcedures.filter(p =>
+                    p.procedimento.toLowerCase().includes(state.filters.search.toLowerCase())
+                );
+            }
+
+            // Apply specialty filter
+            if (state.filters.specialty !== 'all') {
+                filteredProcedures = filteredProcedures.filter(p => p.especialidade === state.filters.specialty);
+            }
+
+            // Apply price filter
+            if (state.filters.minPrice !== null) {
+                filteredProcedures = filteredProcedures.filter(p => p.valorBRL >= state.filters.minPrice);
+            }
+            if (state.filters.maxPrice !== null) {
+                filteredProcedures = filteredProcedures.filter(p => p.valorBRL <= state.filters.maxPrice);
+            }
+
+            // Apply sorting
+            switch (state.sort) {
+                case 'valor-asc':
+                    filteredProcedures.sort((a, b) => a.valorBRL - b.valorBRL);
+                    break;
+                case 'valor-desc':
+                    filteredProcedures.sort((a, b) => b.valorBRL - a.valorBRL);
+                    break;
+                case 'alfa-asc':
+                    filteredProcedures.sort((a, b) => a.procedimento.localeCompare(b.procedimento));
+                    break;
+                case 'alfa-desc':
+                    filteredProcedures.sort((a, b) => b.procedimento.localeCompare(a.procedimento));
+                    break;
+                case 'especialidade':
+                    filteredProcedures.sort((a, b) => a.especialidade.localeCompare(b.especialidade));
+                    break;
+            }
+
+            // Render to DOM
+            proceduresList.innerHTML = filteredProcedures.map(renderProcedureCard).join('');
+            procedureCount.textContent = `${filteredProcedures.length} encontrados`;
+
+            // Update stats and chart based on the filtered list
+            updateStatistics(filteredProcedures);
+            updateChart(filteredProcedures);
+        };
+
+        /**
+         * Renders the statistics section.
+         * @param {array} procedures - The list of procedures to calculate stats from.
+         */
+        const updateStatistics = (procedures) => {
+            if (procedures.length === 0) {
+                statsContainer.innerHTML = '<p class="text-slate-500 text-center">Nenhum procedimento encontrado com os filtros atuais.</p>';
+                return;
+            }
+
+            const statsBySpecialty = procedures.reduce((acc, p) => {
+                if (!acc[p.especialidade]) {
+                    acc[p.especialidade] = {
+                        values: [],
+                        count: 0
+                    };
+                }
+                acc[p.especialidade].values.push(p.valorBRL);
+                acc[p.especialidade].count++;
+                return acc;
+            }, {});
+
+            let statsHTML = '';
+            for (const specialty in statsBySpecialty) {
+                const values = statsBySpecialty[specialty].values;
+                const count = statsBySpecialty[specialty].count;
+                const min = Math.min(...values);
+                const max = Math.max(...values);
+                const avg = values.reduce((sum, val) => sum + val, 0) / count;
+
+                statsHTML += `
+                    <div class="p-3 bg-slate-50 rounded-lg">
+                        <h4 class="font-semibold text-slate-700">${specialty} (${count} ${count > 1 ? 'itens' : 'item'})</h4>
+                        <div class="grid grid-cols-3 gap-2 text-sm mt-2 text-center">
+                            <div>
+                                <p class="text-slate-500">Mín</p>
+                                <p class="font-medium text-blue-600">${formatCurrency(min)}</p>
+                            </div>
+                            <div>
+                                <p class="text-slate-500">Méd</p>
+                                <p class="font-medium text-purple-600">${formatCurrency(avg)}</p>
+                            </div>
+                            <div>
+                                <p class="text-slate-500">Máx</p>
+                                <p class="font-medium text-red-600">${formatCurrency(max)}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            statsContainer.innerHTML = statsHTML;
+        };
+
+        /**
+         * Updates the price histogram chart.
+         * @param {array} procedures - The list of procedures to display on the chart.
+         */
+        const updateChart = (procedures) => {
+            const ctx = document.getElementById('price-histogram').getContext('2d');
+            
+            const prices = procedures.map(p => p.valorBRL);
+            const maxPrice = Math.max(...prices, 0);
+            const binCount = 10;
+            const binSize = Math.ceil(maxPrice / binCount);
+
+            const bins = Array(binCount).fill(0);
+            const labels = [];
+
+            for (let i = 0; i < binCount; i++) {
+                const min = i * binSize;
+                const max = (i + 1) * binSize;
+                labels.push(`R$${min}-${max}`);
+            }
+
+            prices.forEach(price => {
+                const binIndex = Math.floor(price / binSize);
+                if (bins[binIndex] !== undefined) {
+                    bins[binIndex]++;
+                }
+            });
+
+            if (priceChart) {
+                priceChart.destroy();
+            }
+
+            priceChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Nº de Procedimentos por Faixa de Preço',
+                        data: bins,
+                        backgroundColor: 'rgba(59, 130, 246, 0.6)', // blue-500
+                        borderColor: 'rgba(37, 99, 235, 1)', // blue-700
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Quantidade'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Faixa de Valor (R$)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: true
+                        }
+                    }
+                }
+            });
+        };
+
+        /**
+         * Renders the budget section based on selected items.
+         */
+        const renderBudget = () => {
+            if(state.budget.length === 0) {
+                budgetItemsContainer.innerHTML = '<p class="text-slate-400 text-center">Selecione procedimentos para adicioná-los ao orçamento.</p>';
+                budgetTotalBRL.textContent = formatCurrency(0);
+                budgetTotalUSD.textContent = formatCurrency(0, 'USD');
+                return;
+            }
+
+            let totalBRL = 0;
+            let totalUSD = 0;
+
+            const budgetItemsHTML = state.budget.map(id => {
+                const proc = state.procedures.find(p => p.id === id);
+                totalBRL += proc.valorBRL;
+                totalUSD += proc.valorUSD;
+                return `
+                    <div class="flex justify-between items-center bg-slate-700 p-2 rounded-md budget-item-enter budget-item-enter-active">
+                        <span class="text-sm flex-1 pr-2">${proc.procedimento}</span>
+                        <span class="text-sm font-semibold text-green-400">${formatCurrency(proc.valorBRL)}</span>
+                    </div>
+                `;
+            }).join('');
+
+            budgetItemsContainer.innerHTML = budgetItemsHTML;
+            budgetTotalBRL.textContent = formatCurrency(totalBRL);
+            budgetTotalUSD.textContent = formatCurrency(totalUSD, 'USD');
+        };
+
+        // --- EVENT HANDLERS ---
+        
+        const handleFilterChange = () => {
+            state.filters.search = searchInput.value;
+            state.sort = sortSelect.value;
+            state.filters.specialty = specialtyFilter.value;
+            state.filters.minPrice = minPriceInput.value ? parseFloat(minPriceInput.value) : null;
+            state.filters.maxPrice = maxPriceInput.value ? parseFloat(maxPriceInput.value) : null;
+            renderProcedures();
+        };
+
+        const handleProcedureClick = (event) => {
+            const card = event.target.closest('[data-id]');
+            if (!card) return;
+
+            const id = parseInt(card.dataset.id);
+            if (state.budget.includes(id)) {
+                state.budget = state.budget.filter(budgetId => budgetId !== id);
+            } else {
+                state.budget.push(id);
+            }
+            renderProcedures(); // To update selection style
+            renderBudget();
+        };
+
+        // --- INITIALIZATION ---
+        
+        const init = () => {
+            // Populate specialty filter
+            const specialties = [...new Set(state.procedures.map(p => p.especialidade))].sort();
+            specialties.forEach(s => {
+                const option = document.createElement('option');
+                option.value = s;
+                option.textContent = s;
+                specialtyFilter.appendChild(option);
+            });
+
+            // Add event listeners
+            searchInput.addEventListener('input', handleFilterChange);
+            sortSelect.addEventListener('change', handleFilterChange);
+            specialtyFilter.addEventListener('change', handleFilterChange);
+            minPriceInput.addEventListener('input', handleFilterChange);
+            maxPriceInput.addEventListener('input', handleFilterChange);
+            proceduresList.addEventListener('click', handleProcedureClick);
+
+            // Initial render
+            renderProcedures();
+            renderBudget();
+        };
+
+        // Run the app
+        document.addEventListener('DOMContentLoaded', init);
+
+    </script>
+</body>
+</html>
