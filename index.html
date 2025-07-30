@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-br" class="">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,7 +12,6 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f2f5;
         }
         .filter-panel {
             transition: transform 0.3s ease-in-out, width 0.3s ease-in-out;
@@ -38,9 +37,15 @@
         ::-webkit-scrollbar-track {
             background: #f1f1f1;
         }
+        .dark ::-webkit-scrollbar-track {
+            background: #2d3748;
+        }
         ::-webkit-scrollbar-thumb {
             background: #888;
             border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #4a5568;
         }
         ::-webkit-scrollbar-thumb:hover {
             background: #555;
@@ -50,42 +55,41 @@
             height: 40vh;
             width: 100%;
         }
-        .stat-card {
-            background-color: white;
-            border-radius: 0.75rem;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            text-align: center;
-        }
     </style>
+    <script>
+        // Configuração do Tailwind para o modo escuro
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
 </head>
-<body class="bg-gray-50 text-gray-800">
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
 
     <div class="flex min-h-screen">
         <!-- Painel de Filtros -->
-        <aside id="filter-panel" class="filter-panel w-full md:w-80 bg-white p-6 shadow-lg flex-shrink-0 fixed md:relative h-full">
+        <aside id="filter-panel" class="filter-panel w-full md:w-80 bg-white dark:bg-gray-800 p-6 shadow-lg flex-shrink-0 fixed md:relative h-full">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-gray-700">Filtros</h2>
-                <button id="toggle-filters-btn-inside" class="md:hidden p-2 text-gray-600 hover:text-gray-900">
+                <h2 class="text-2xl font-bold text-gray-700 dark:text-gray-100">Filtros</h2>
+                <button id="toggle-filters-btn-inside" class="md:hidden p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
 
             <!-- Pesquisa -->
             <div class="mb-4">
-                <label for="search" class="block text-sm font-medium text-gray-600 mb-2">Pesquisar Procedimento</label>
+                <label for="search" class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Pesquisar Procedimento</label>
                 <div class="relative">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3">
                         <i class="fas fa-search text-gray-400"></i>
                     </span>
-                    <input type="text" id="search" placeholder="Nome do procedimento..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                    <input type="text" id="search" placeholder="Nome do procedimento..." class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                 </div>
             </div>
 
             <!-- Ordenar -->
             <div class="mb-4">
-                <label for="sort" class="block text-sm font-medium text-gray-600 mb-2">Ordenar por</label>
-                <select id="sort" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                <label for="sort" class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Ordenar por</label>
+                <select id="sort" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                     <option value="alpha">Alfabética (A-Z)</option>
                     <option value="price-asc">Valor (Menor para Maior)</option>
                     <option value="price-desc">Valor (Maior para Menor)</option>
@@ -95,19 +99,19 @@
 
             <!-- Filtrar por Especialidade -->
             <div class="mb-4">
-                <label for="specialty-filter" class="block text-sm font-medium text-gray-600 mb-2">Especialidade</label>
-                <select id="specialty-filter" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                <label for="specialty-filter" class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Especialidade</label>
+                <select id="specialty-filter" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                     <option value="all">Todas</option>
                 </select>
             </div>
 
             <!-- Filtrar por Valor -->
             <div>
-                <label for="price-range" class="block text-sm font-medium text-gray-600 mb-2">Faixa de Valor (R$)</label>
-                <input type="range" id="price-range" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" min="0" max="10000" step="100">
-                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                <label for="price-range" class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Faixa de Valor (R$)</label>
+                <input type="range" id="price-range" class="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer" min="0" max="10000" step="100">
+                <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
                     <span id="min-price-label">R$ 0</span>
-                    <span id="max-price-label">R$ 10000+</span>
+                    <span id="max-price-label">R$ 10.000+</span>
                 </div>
             </div>
         </aside>
@@ -116,16 +120,24 @@
         <main id="main-content" class="flex-1 p-4 md:p-8 transition-all duration-300">
             <header class="flex justify-between items-center mb-6">
                  <div class="flex items-center gap-4">
-                    <button id="toggle-filters-btn-outside" class="p-2 text-gray-600 bg-white rounded-full shadow-md hover:bg-gray-100">
+                    <button id="toggle-filters-btn-outside" class="p-2 text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 rounded-full shadow-md hover:bg-gray-100 dark:hover:bg-gray-700">
                         <i class="fas fa-filter"></i>
                     </button>
-                    <h1 class="text-3xl font-bold text-gray-800">Procedimentos Odontológicos</h1>
+                    <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100">Procedimentos</h1>
                 </div>
-                <button id="budget-toggle-btn" class="flex items-center gap-2 bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-lg hover:bg-blue-700 transition-transform transform hover:scale-105">
-                    <i class="fas fa-file-invoice-dollar"></i>
-                    <span>Orçamento</span>
-                    <span id="budget-count" class="bg-white text-blue-600 text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
-                </button>
+                <div class="flex items-center gap-3">
+                    <button id="scroll-to-stats-btn" class="p-2 text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 rounded-full shadow-md hover:bg-gray-100 dark:hover:bg-gray-700" title="Ir para Estatísticas">
+                        <i class="fas fa-chart-bar"></i>
+                    </button>
+                    <button id="theme-toggle-btn" class="p-2 text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 rounded-full shadow-md hover:bg-gray-100 dark:hover:bg-gray-700" title="Alternar Tema">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button id="budget-toggle-btn" class="flex items-center gap-2 bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-lg hover:bg-blue-700 transition-transform transform hover:scale-105">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        <span>Orçamento</span>
+                        <span id="budget-count" class="bg-white text-blue-600 text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                    </button>
+                </div>
             </header>
 
             <!-- Lista de Procedimentos -->
@@ -133,39 +145,39 @@
                 <!-- Cards de procedimentos serão inseridos aqui -->
             </div>
              <div id="no-results" class="hidden text-center py-16">
-                <i class="fas fa-search fa-3x text-gray-400 mb-4"></i>
-                <p class="text-xl text-gray-600">Nenhum procedimento encontrado.</p>
-                <p class="text-gray-500">Tente ajustar seus filtros ou termo de pesquisa.</p>
+                <i class="fas fa-search fa-3x text-gray-400 dark:text-gray-500 mb-4"></i>
+                <p class="text-xl text-gray-600 dark:text-gray-300">Nenhum procedimento encontrado.</p>
+                <p class="text-gray-500 dark:text-gray-400">Tente ajustar seus filtros ou termo de pesquisa.</p>
             </div>
 
             <!-- Seção de Estatísticas -->
             <section id="stats-section" class="mt-12">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">Estatísticas</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">Estatísticas</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <!-- Stats por Especialidade -->
-                    <div class="bg-white p-6 rounded-xl shadow-md">
-                        <h3 class="font-bold text-lg mb-4 text-gray-700">Análise por Especialidade</h3>
-                        <select id="stats-specialty-selector" class="w-full p-2 mb-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                            <!-- Opções de especialidade aqui -->
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
+                        <h3 class="font-bold text-lg mb-4 text-gray-700 dark:text-gray-200">Análise de Preços</h3>
+                        <select id="stats-specialty-selector" class="w-full p-2 mb-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500">
+                            <option value="all">Todas as Especialidades</option>
                         </select>
-                        <div id="specialty-stats-display" class="grid grid-cols-3 gap-4 text-center">
+                        <div id="specialty-stats-display" class="grid grid-cols-3 gap-4 text-center mt-4">
                            <div>
-                                <p class="text-sm text-gray-500">Mínimo</p>
-                                <p id="stat-min" class="text-xl font-semibold text-green-600">R$ 0</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Mínimo</p>
+                                <p id="stat-min" class="text-xl font-semibold text-green-600 dark:text-green-400">R$ 0</p>
                             </div>
                             <div>
-                                <p class="text-sm text-gray-500">Médio</p>
-                                <p id="stat-avg" class="text-2xl font-bold text-blue-600">R$ 0</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Médio</p>
+                                <p id="stat-avg" class="text-2xl font-bold text-blue-600 dark:text-blue-400">R$ 0</p>
                             </div>
                             <div>
-                                <p class="text-sm text-gray-500">Máximo</p>
-                                <p id="stat-max" class="text-xl font-semibold text-red-600">R$ 0</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Máximo</p>
+                                <p id="stat-max" class="text-xl font-semibold text-red-600 dark:text-red-400">R$ 0</p>
                             </div>
                         </div>
                     </div>
                     <!-- Histograma de Preços -->
-                    <div class="bg-white p-6 rounded-xl shadow-md">
-                         <h3 class="font-bold text-lg mb-4 text-gray-700">Distribuição de Preços (Histograma)</h3>
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
+                         <h3 class="font-bold text-lg mb-4 text-gray-700 dark:text-gray-200">Distribuição de Preços (Histograma)</h3>
                         <div class="chart-container">
                             <canvas id="price-histogram"></canvas>
                         </div>
@@ -176,27 +188,26 @@
     </div>
 
     <!-- Painel de Orçamento -->
-    <div id="budget-panel" class="budget-panel fixed top-0 right-0 h-full w-full md:w-96 bg-white shadow-2xl transform translate-x-full p-6 flex flex-col">
-        <div class="flex justify-between items-center border-b pb-4 mb-4">
-            <h2 class="text-2xl font-bold text-gray-800">Seu Orçamento</h2>
-            <button id="close-budget-btn" class="p-2 text-gray-600 hover:text-gray-900">
+    <div id="budget-panel" class="budget-panel fixed top-0 right-0 h-full w-full md:w-96 bg-white dark:bg-gray-800 shadow-2xl transform translate-x-full p-6 flex flex-col">
+        <div class="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-4 mb-4">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Seu Orçamento</h2>
+            <button id="close-budget-btn" class="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
                 <i class="fas fa-times fa-lg"></i>
             </button>
         </div>
         <div id="budget-items" class="flex-grow overflow-y-auto pr-2">
-            <!-- Itens do orçamento aqui -->
              <div id="empty-budget" class="text-center py-16">
-                <i class="fas fa-shopping-cart fa-3x text-gray-300 mb-4"></i>
-                <p class="text-gray-500">Seu orçamento está vazio.</p>
-                <p class="text-sm text-gray-400">Clique em <i class="fas fa-plus-circle text-blue-500"></i> nos procedimentos para adicionar.</p>
+                <i class="fas fa-shopping-cart fa-3x text-gray-300 dark:text-gray-600 mb-4"></i>
+                <p class="text-gray-500 dark:text-gray-400">Seu orçamento está vazio.</p>
+                <p class="text-sm text-gray-400 dark:text-gray-500">Clique em <i class="fas fa-plus-circle text-blue-500"></i> nos procedimentos para adicionar.</p>
             </div>
         </div>
-        <div class="border-t pt-4 mt-4">
+        <div class="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
             <div class="flex justify-between items-center text-xl font-bold mb-4">
-                <span>Total:</span>
+                <span class="dark:text-gray-200">Total:</span>
                 <div class="text-right">
-                    <p id="budget-total-brl" class="text-blue-600">R$ 0,00</p>
-                    <p id="budget-total-usd" class="text-sm text-gray-500">$ 0.00</p>
+                    <p id="budget-total-brl" class="text-blue-600 dark:text-blue-400">R$ 0</p>
+                    <p id="budget-total-usd" class="text-base text-gray-500 dark:text-gray-400">$ 0</p>
                 </div>
             </div>
              <button id="clear-budget-btn" class="w-full bg-red-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-600 transition disabled:opacity-50 disabled:cursor-not-allowed">
@@ -207,7 +218,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // --- DADOS DOS PROCEDIMENTOS EMBUTIDOS DIRETAMENTE NO CÓDIGO ---
             const proceduresData = [
                 { name: "Acabamento e polimento- sessão", specialty: "Dentística", valueBRL: 550, valueUSD: 91.74 },
                 { name: "Ajuste Oclusal - 2 sessões", specialty: "Dentística", valueBRL: 820, valueUSD: 136.78 },
@@ -285,11 +295,10 @@
             let budget = [];
             let priceChart = null;
             
-            // Mapeia os dados brutos para a estrutura do aplicativo, garantindo IDs únicos
             procedures = proceduresData.map(p => ({
                 ...p,
                 id: p.name.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Math.random().toString(36).substr(2, 9)
-            })).filter(p => p.valueBRL > 0); // Filtra procedimentos com valor 0
+            })).filter(p => p.valueBRL > 0);
 
             const procedureList = document.getElementById('procedure-list');
             const searchInput = document.getElementById('search');
@@ -299,12 +308,10 @@
             const minPriceLabel = document.getElementById('min-price-label');
             const maxPriceLabel = document.getElementById('max-price-label');
             const noResultsDiv = document.getElementById('no-results');
-
             const filterPanel = document.getElementById('filter-panel');
             const mainContent = document.getElementById('main-content');
             const toggleFiltersBtnOutside = document.getElementById('toggle-filters-btn-outside');
             const toggleFiltersBtnInside = document.getElementById('toggle-filters-btn-inside');
-
             const budgetPanel = document.getElementById('budget-panel');
             const budgetToggleBtn = document.getElementById('budget-toggle-btn');
             const closeBudgetBtn = document.getElementById('close-budget-btn');
@@ -314,63 +321,66 @@
             const budgetTotalUSD = document.getElementById('budget-total-usd');
             const emptyBudgetDiv = document.getElementById('empty-budget');
             const clearBudgetBtn = document.getElementById('clear-budget-btn');
-            
             const statsSpecialtySelector = document.getElementById('stats-specialty-selector');
             const statMin = document.getElementById('stat-min');
             const statAvg = document.getElementById('stat-avg');
             const statMax = document.getElementById('stat-max');
+            const themeToggleButton = document.getElementById('theme-toggle-btn');
+            const scrollToStatsButton = document.getElementById('scroll-to-stats-btn');
 
-            // Inicializa a aplicação
+            // --- FUNÇÕES AUXILIARES ---
+            const formatCurrency = (value) => Math.round(value).toLocaleString('pt-BR');
+
+            // --- INICIALIZAÇÃO ---
             function initialize() {
                 populateSpecialtyFilter();
                 setupEventListeners();
                 updateDisplay();
                 updateStats();
+                checkInitialTheme();
             }
 
-            // Popula os filtros de especialidade
             function populateSpecialtyFilter() {
                 const specialties = [...new Set(procedures.map(p => p.specialty))].sort();
                 specialties.forEach(s => {
                     const option = document.createElement('option');
                     option.value = s;
                     option.textContent = s;
-                    specialtyFilter.appendChild(option.cloneNode(true));
-                    statsSpecialtySelector.appendChild(option);
+                    statsSpecialtySelector.appendChild(option.cloneNode(true));
+                    specialtyFilter.appendChild(option);
                 });
                 
-                // Ajusta o range de preço máximo
                 const maxPrice = Math.max(...procedures.map(p => p.valueBRL));
                 priceRange.max = Math.ceil(maxPrice / 100) * 100;
                 priceRange.value = priceRange.max;
-                maxPriceLabel.textContent = `R$ ${priceRange.max}`;
+                maxPriceLabel.textContent = `R$ ${formatCurrency(priceRange.max)}`;
             }
 
-            // Configura os event listeners
             function setupEventListeners() {
                 searchInput.addEventListener('input', updateDisplay);
                 sortSelect.addEventListener('change', updateDisplay);
                 specialtyFilter.addEventListener('change', updateDisplay);
                 priceRange.addEventListener('input', () => {
-                   minPriceLabel.textContent = `R$ ${priceRange.value}`;
+                   minPriceLabel.textContent = `R$ ${formatCurrency(priceRange.value)}`;
                    updateDisplay();
                 });
 
                 toggleFiltersBtnOutside.addEventListener('click', toggleFilterPanel);
                 toggleFiltersBtnInside.addEventListener('click', toggleFilterPanel);
-
                 budgetToggleBtn.addEventListener('click', () => budgetPanel.classList.remove('translate-x-full'));
                 closeBudgetBtn.addEventListener('click', () => budgetPanel.classList.add('translate-x-full'));
                 clearBudgetBtn.addEventListener('click', clearBudget);
-                
                 statsSpecialtySelector.addEventListener('change', updateStats);
+                themeToggleButton.addEventListener('click', toggleTheme);
+                scrollToStatsButton.addEventListener('click', () => {
+                    document.getElementById('stats-section').scrollIntoView({ behavior: 'smooth' });
+                });
             }
 
-            // Atualiza a exibição dos procedimentos
+            // --- LÓGICA DE EXIBIÇÃO ---
             function updateDisplay() {
                 let filteredProcedures = [...procedures];
 
-                // Filtragem
                 const searchTerm = searchInput.value.toLowerCase();
                 const selectedSpecialty = specialtyFilter.value;
                 const maxPrice = Number(priceRange.value);
@@ -382,46 +392,35 @@
                     return nameMatch && specialtyMatch && priceMatch;
                 });
 
-                // Ordenação
                 const sortValue = sortSelect.value;
-                if (sortValue === 'alpha') {
-                    filteredProcedures.sort((a, b) => a.name.localeCompare(b.name));
-                } else if (sortValue === 'price-asc') {
-                    filteredProcedures.sort((a, b) => a.valueBRL - b.valueBRL);
-                } else if (sortValue === 'price-desc') {
-                    filteredProcedures.sort((a, b) => b.valueBRL - a.valueBRL);
-                } else if (sortValue === 'specialty') {
-                    filteredProcedures.sort((a, b) => a.specialty.localeCompare(b.specialty));
-                }
+                if (sortValue === 'alpha') filteredProcedures.sort((a, b) => a.name.localeCompare(b.name));
+                else if (sortValue === 'price-asc') filteredProcedures.sort((a, b) => a.valueBRL - b.valueBRL);
+                else if (sortValue === 'price-desc') filteredProcedures.sort((a, b) => b.valueBRL - a.valueBRL);
+                else if (sortValue === 'specialty') filteredProcedures.sort((a, b) => a.specialty.localeCompare(b.specialty));
 
                 renderProcedures(filteredProcedures);
                 updateHistogram(filteredProcedures);
             }
 
-            // Renderiza os cards de procedimentos
             function renderProcedures(procs) {
                 procedureList.innerHTML = '';
-                if (procs.length === 0) {
-                    noResultsDiv.classList.remove('hidden');
-                } else {
-                    noResultsDiv.classList.add('hidden');
-                }
+                noResultsDiv.classList.toggle('hidden', procs.length > 0);
                 
                 procs.forEach(p => {
                     const isInBudget = budget.some(item => item.id === p.id);
                     const card = document.createElement('div');
-                    card.className = 'bg-white p-4 rounded-lg shadow-md hover:shadow-xl transition-shadow flex flex-col justify-between';
+                    card.className = 'bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md hover:shadow-xl dark:hover:shadow-blue-900/50 transition-shadow flex flex-col justify-between';
                     card.innerHTML = `
                         <div>
-                            <h3 class="font-bold text-md text-gray-800">${p.name}</h3>
-                            <p class="text-sm text-gray-500 mb-3">${p.specialty}</p>
+                            <h3 class="font-bold text-md text-gray-800 dark:text-gray-100">${p.name}</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">${p.specialty}</p>
                         </div>
-                        <div class="flex justify-between items-center">
+                        <div class="flex justify-between items-center mt-2">
                             <div class="text-left">
-                                <p class="font-semibold text-lg text-blue-600">R$ ${p.valueBRL.toFixed(2).replace('.', ',')}</p>
-                                <p class="text-xs text-gray-400">$ ${p.valueUSD.toFixed(2)}</p>
+                                <p class="font-semibold text-lg text-blue-600 dark:text-blue-400">R$ ${formatCurrency(p.valueBRL)}</p>
+                                <p class="text-base font-medium text-gray-500 dark:text-gray-300">$ ${formatCurrency(p.valueUSD)}</p>
                             </div>
-                            <button data-id="${p.id}" class="add-to-budget-btn p-2 rounded-full transition ${isInBudget ? 'bg-green-500 text-white' : 'bg-blue-100 text-blue-600 hover:bg-blue-200'}">
+                            <button data-id="${p.id}" class="add-to-budget-btn p-2 rounded-full transition ${isInBudget ? 'bg-green-500 text-white' : 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800'}">
                                 <i class="fas ${isInBudget ? 'fa-check' : 'fa-plus'}"></i>
                             </button>
                         </div>
@@ -430,38 +429,24 @@
                 });
 
                 document.querySelectorAll('.add-to-budget-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const id = e.currentTarget.dataset.id;
-                        toggleBudgetItem(id);
-                    });
+                    btn.addEventListener('click', (e) => toggleBudgetItem(e.currentTarget.dataset.id));
                 });
             }
 
-            // Funções do Orçamento
+            // --- LÓGICA DO ORÇAMENTO ---
             function toggleBudgetItem(id) {
-                const procedure = procedures.find(p => p.id === id);
                 const indexInBudget = budget.findIndex(item => item.id === id);
-
-                if (indexInBudget > -1) {
-                    budget.splice(indexInBudget, 1); // Remove
-                } else {
-                    budget.push(procedure); // Adiciona
-                }
+                if (indexInBudget > -1) budget.splice(indexInBudget, 1);
+                else budget.push(procedures.find(p => p.id === id));
                 updateBudgetPanel();
-                updateDisplay(); // Para atualizar o ícone de '+' para 'check'
+                updateDisplay();
             }
             
             function updateBudgetPanel() {
                 budgetCount.textContent = budget.length;
                 budgetItemsContainer.innerHTML = '';
-
-                if (budget.length === 0) {
-                    emptyBudgetDiv.classList.remove('hidden');
-                    clearBudgetBtn.disabled = true;
-                } else {
-                    emptyBudgetDiv.classList.add('hidden');
-                    clearBudgetBtn.disabled = false;
-                }
+                emptyBudgetDiv.classList.toggle('hidden', budget.length > 0);
+                clearBudgetBtn.disabled = budget.length === 0;
 
                 let totalBRL = 0;
                 let totalUSD = 0;
@@ -470,11 +455,11 @@
                     totalBRL += p.valueBRL;
                     totalUSD += p.valueUSD;
                     const item = document.createElement('div');
-                    item.className = 'flex justify-between items-center mb-3 p-2 bg-gray-50 rounded-lg';
+                    item.className = 'flex justify-between items-center mb-3 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg';
                     item.innerHTML = `
                         <div class="flex-grow pr-2">
-                            <p class="text-sm font-medium">${p.name}</p>
-                            <p class="text-xs text-gray-500">R$ ${p.valueBRL.toFixed(2).replace('.', ',')}</p>
+                            <p class="text-sm font-medium dark:text-gray-200">${p.name}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">R$ ${formatCurrency(p.valueBRL)}</p>
                         </div>
                         <button data-id="${p.id}" class="remove-from-budget-btn text-red-500 hover:text-red-700 p-1 rounded-full">
                             <i class="fas fa-trash-alt"></i>
@@ -483,14 +468,11 @@
                     budgetItemsContainer.appendChild(item);
                 });
 
-                budgetTotalBRL.textContent = `R$ ${totalBRL.toFixed(2).replace('.', ',')}`;
-                budgetTotalUSD.textContent = `$ ${totalUSD.toFixed(2)}`;
+                budgetTotalBRL.textContent = `R$ ${formatCurrency(totalBRL)}`;
+                budgetTotalUSD.textContent = `$ ${formatCurrency(totalUSD)}`;
                 
                 document.querySelectorAll('.remove-from-budget-btn').forEach(btn => {
-                    btn.addEventListener('click', e => {
-                        const id = e.currentTarget.dataset.id;
-                        toggleBudgetItem(id);
-                    });
+                    btn.addEventListener('click', e => toggleBudgetItem(e.currentTarget.dataset.id));
                 });
             }
 
@@ -500,130 +482,92 @@
                 updateDisplay();
             }
 
-            // Funções de Estatísticas
+            // --- LÓGICA DE ESTATÍSTICAS ---
             function updateStats() {
                 const selectedSpecialty = statsSpecialtySelector.value;
-                const procsInSpecialty = procedures.filter(p => p.specialty === selectedSpecialty);
+                const dataSet = selectedSpecialty === 'all' 
+                    ? procedures 
+                    : procedures.filter(p => p.specialty === selectedSpecialty);
 
-                if (procsInSpecialty.length > 0) {
-                    const values = procsInSpecialty.map(p => p.valueBRL);
-                    const min = Math.min(...values);
-                    const max = Math.max(...values);
-                    const avg = values.reduce((a, b) => a + b, 0) / values.length;
-
-                    statMin.textContent = `R$ ${min.toFixed(2).replace('.', ',')}`;
-                    statAvg.textContent = `R$ ${avg.toFixed(2).replace('.', ',')}`;
-                    statMax.textContent = `R$ ${max.toFixed(2).replace('.', ',')}`;
+                if (dataSet.length > 0) {
+                    const values = dataSet.map(p => p.valueBRL);
+                    statMin.textContent = `R$ ${formatCurrency(Math.min(...values))}`;
+                    statMax.textContent = `R$ ${formatCurrency(Math.max(...values))}`;
+                    statAvg.textContent = `R$ ${formatCurrency(values.reduce((a, b) => a + b, 0) / values.length)}`;
                 } else {
-                    statMin.textContent = 'R$ 0,00';
-                    statAvg.textContent = 'R$ 0,00';
-                    statMax.textContent = 'R$ 0,00';
+                    statMin.textContent = 'R$ 0';
+                    statAvg.textContent = 'R$ 0';
+                    statMax.textContent = 'R$ 0';
                 }
             }
 
-            // Função para atualizar o histograma
             function updateHistogram(data) {
                 const ctx = document.getElementById('price-histogram').getContext('2d');
                 const prices = data.map(p => p.valueBRL);
                 
-                if (priceChart) {
-                    priceChart.destroy();
-                }
-                
+                if (priceChart) priceChart.destroy();
                 if (prices.length === 0) return;
 
                 const maxPrice = Math.max(...prices);
                 const binCount = 10;
                 const binSize = Math.ceil(maxPrice / binCount);
                 const bins = new Array(binCount).fill(0);
-                const labels = [];
-
-                for (let i = 0; i < binCount; i++) {
-                    labels.push(`R$${i * binSize} - R$${(i + 1) * binSize}`);
-                }
+                const labels = Array.from({length: binCount}, (_, i) => `R$${formatCurrency(i * binSize)} - ${formatCurrency((i + 1) * binSize)}`);
 
                 prices.forEach(price => {
                     const binIndex = Math.min(Math.floor(price / binSize), binCount - 1);
                     bins[binIndex]++;
                 });
+                
+                const isDarkMode = document.documentElement.classList.contains('dark');
+                const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+                const textColor = isDarkMode ? '#e5e7eb' : '#374151';
 
                 priceChart = new Chart(ctx, {
                     type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Nº de Procedimentos',
-                            data: bins,
-                            backgroundColor: 'rgba(59, 130, 246, 0.7)',
-                            borderColor: 'rgba(59, 130, 246, 1)',
-                            borderWidth: 1,
-                            borderRadius: 5,
-                        }]
-                    },
+                    data: { labels, datasets: [{ label: 'Nº de Procedimentos', data: bins, backgroundColor: 'rgba(59, 130, 246, 0.7)', borderColor: 'rgba(59, 130, 246, 1)', borderWidth: 1, borderRadius: 5 }] },
                     options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
+                        responsive: true, maintainAspectRatio: false,
                         scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: {
-                                    display: true,
-                                    text: 'Quantidade'
-                                }
-                            },
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: 'Faixa de Preço (R$)'
-                                }
-                            }
+                            y: { beginAtZero: true, title: { display: true, text: 'Quantidade', color: textColor }, ticks: { color: textColor }, grid: { color: gridColor } },
+                            x: { title: { display: true, text: 'Faixa de Preço (R$)', color: textColor }, ticks: { color: textColor }, grid: { color: gridColor } }
                         },
-                        plugins: {
-                            legend: {
-                                display: false
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        let label = context.dataset.label || '';
-                                        if (label) {
-                                            label += ': ';
-                                        }
-                                        if (context.parsed.y !== null) {
-                                            label += context.parsed.y;
-                                        }
-                                        return label;
-                                    }
-                                }
-                            }
-                        }
+                        plugins: { legend: { display: false }, tooltip: { bodyColor: '#fff', titleColor: '#fff' } }
                     }
                 });
             }
 
-            // Função para alternar o painel de filtros
+            // --- LÓGICA DE TEMA E LAYOUT ---
+            function toggleTheme() {
+                const html = document.documentElement;
+                html.classList.toggle('dark');
+                if (html.classList.contains('dark')) {
+                    localStorage.setItem('theme', 'dark');
+                    themeToggleButton.innerHTML = '<i class="fas fa-sun"></i>';
+                } else {
+                    localStorage.setItem('theme', 'light');
+                    themeToggleButton.innerHTML = '<i class="fas fa-moon"></i>';
+                }
+                updateDisplay(); // Redesenha o gráfico com as cores do novo tema
+            }
+
+            function checkInitialTheme() {
+                if (localStorage.getItem('theme') === 'dark' || (window.matchMedia('(prefers-color-scheme: dark)').matches && !localStorage.getItem('theme'))) {
+                    document.documentElement.classList.add('dark');
+                    themeToggleButton.innerHTML = '<i class="fas fa-sun"></i>';
+                }
+            }
+
             function toggleFilterPanel() {
-                const isCollapsed = filterPanel.classList.contains('collapsed');
-                if (window.innerWidth < 768) { 
-                     if (isCollapsed) {
-                        filterPanel.classList.remove('collapsed');
-                     } else {
-                        filterPanel.classList.add('collapsed');
-                     }
-                } else { 
-                    filterPanel.classList.toggle('collapsed');
-                    if (filterPanel.classList.contains('collapsed')) {
-                        mainContent.style.marginLeft = '0';
-                    } else {
-                        mainContent.style.marginLeft = `${filterPanel.offsetWidth}px`;
-                    }
+                filterPanel.classList.toggle('collapsed');
+                if (window.innerWidth >= 768) {
+                    mainContent.style.marginLeft = filterPanel.classList.contains('collapsed') ? '0' : `${filterPanel.offsetWidth}px`;
                 }
             }
             
             window.addEventListener('resize', () => {
                 if (window.innerWidth >= 768) {
-                    filterPanel.classList.remove('collapsed');
-                    mainContent.style.marginLeft = `${filterPanel.offsetWidth}px`;
+                    if(!filterPanel.classList.contains('collapsed')) mainContent.style.marginLeft = `${filterPanel.offsetWidth}px`;
                 } else {
                     filterPanel.classList.add('collapsed');
                     mainContent.style.marginLeft = '0';
@@ -637,7 +581,6 @@
                 mainContent.style.marginLeft = `${filterPanel.offsetWidth}px`;
             }
 
-            // Inicia a aplicação com os dados já carregados
             initialize();
         });
     </script>
